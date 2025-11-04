@@ -50,3 +50,5 @@ oc set env deployment/litemaas-chatbot-git -n $YOUR_OPENSHIFT_NAMESPACE LITEMAAS
 
 Once the build finishes and the pod is ready.
 Open the route and try the chat app by writting "Hello Open Source!". 
+
+![alt text](os_chatbot.png "Open Source Chat bot")

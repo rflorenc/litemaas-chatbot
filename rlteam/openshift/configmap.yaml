@@ -17,3 +17,12 @@ data:
   # Team configuration
   TEAM_SUBDOMAIN: "rlteam"
   HOST_SUFFIX: "example.sslip.io"
+
+
+
+# oc set env deployment/litemaas-chatbot-git -n rlourencc-dev LITEMAAS_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com
+# oc set env deployment/litemaas-chatbot-git -n rlourencc-dev LITEMAAS_API_KEY=sk-pjW733nlfvd2kmx8K2arPQ
+
+# oc delete svc,route,build,buildconfig,deploy,is -n rlourencc-dev --all
+# for s in litemaas-chatbot-git-github-webhook-secret litemaas-chatbot-git-generic-webhook-secret ; do oc -n rlourencc-dev delete secret $s ;done
+

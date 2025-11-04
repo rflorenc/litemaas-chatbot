@@ -1,0 +1,101 @@
+🎉 Thank you for installing {{ .Chart.Name }}!
+
+Your release is named: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+📦 Deployed Components:
+  - Deployment: {{ include "mentor-bot.fullname" . }}
+  - Service: {{ include "mentor-bot.fullname" . }}-service
+  {{- if .Values.serviceAccount.create }}
+  - ServiceAccount: {{ include "mentor-bot.serviceAccountName" . }}
+  {{- end }}
+  {{- if .Values.route.enabled }}
+  - Route: {{ include "mentor-bot.fullname" . }}-route
+  {{- end }}
+  {{- if .Values.ingress.enabled }}
+  - Ingress: {{ include "mentor-bot.fullname" . }}
+  {{- end }}
+
+🌐 Access Information:
+{{- if .Values.route.enabled }}
+
+  OpenShift Route:
+  To get the application URL, run:
+    export ROUTE_HOST=$(oc get route {{ include "mentor-bot.fullname" . }}-route -o jsonpath='{.spec.host}')
+    echo "Application URL: https://$ROUTE_HOST"
+
+  Health Check:
+    curl https://$ROUTE_HOST/health
+
+  Chat API:
+    curl -X POST https://$ROUTE_HOST/api/chat \
+      -H 'Content-Type: application/json' \
+      -d '{"message": "Hello!"}'
+
+{{- else if .Values.ingress.enabled }}
+
+  Ingress:
+  {{- range $host := .Values.ingress.hosts }}
+    http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ (index $host.paths 0).path }}
+  {{- end }}
+
+{{- else }}
+
+  Port Forward (for testing):
+    kubectl port-forward -n {{ .Release.Namespace }} \
+      svc/{{ include "mentor-bot.fullname" . }}-service {{ .Values.service.port }}:{{ .Values.service.port }}
+
+  Then access: http://localhost:{{ .Values.service.port }}
+
+{{- end }}
+
+📊 Monitoring:
+
+  View logs:
+    kubectl logs -n {{ .Release.Namespace }} -l {{ include "mentor-bot.selectorLabels" . | replace ": " "=" | replace "\n" "," }}
+
+  Watch pods:
+    kubectl get pods -n {{ .Release.Namespace }} -l {{ include "mentor-bot.selectorLabels" . | replace ": " "=" | replace "\n" "," }} -w
+
+  Describe deployment:
+    kubectl describe deployment {{ include "mentor-bot.fullname" . }} -n {{ .Release.Namespace }}
+
+🔧 Management Commands:
+
+  Upgrade release:
+    helm upgrade {{ .Release.Name }} ./helm/mentor-bot -n {{ .Release.Namespace }}
+
+  Rollback:
+    helm rollback {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  Uninstall:
+    helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  Get values:
+    helm get values {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+⚠️  Important Notes:
+
+{{- if eq .Values.secrets.data.LITEMAAS_API_KEY "YOUR_API_KEY_HERE" }}
+  ⚠️  WARNING: Default API key detected!
+  Please update the secret with your actual LiteMAAS API key:
+    kubectl create secret generic {{ include "mentor-bot.secretName" . }} \
+      --from-literal=LITEMAAS_API_KEY=your-actual-key \
+      --dry-run=client -o yaml | kubectl apply -f -
+    kubectl rollout restart deployment/{{ include "mentor-bot.fullname" . }}
+{{- end }}
+
+{{- if not .Values.secrets.create }}
+  ℹ️  External secret management enabled.
+  Ensure secret '{{ include "mentor-bot.secretName" . }}' exists with required keys:
+    - LITEMAAS_API_KEY
+{{- end }}
+
+📚 Documentation:
+  Chart: https://github.com/rflorenc/opensourcementor/tree/main/teams/rlteam/helm
+  App:   https://github.com/rflorenc/opensourcementor
+
+🐛 Issues and Support:
+  https://github.com/rflorenc/opensourcementor/issues
+
+Happy mentoring! 🚀

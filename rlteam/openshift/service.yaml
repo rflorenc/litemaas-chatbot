@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mentor-bot-service
+  labels:
+    app: mentor-bot
+    team: rlteam
+spec:
+  type: ClusterIP  # Change to LoadBalancer for external access
+  selector:
+    app: mentor-bot
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  sessionAffinity: None

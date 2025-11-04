@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mentor-bot-config
+  labels:
+    app: mentor-bot
+    team: rlteam
+data:
+  # Application configuration
+  PORT: "8080"
+  FLASK_ENV: "production"
+  PYTHONUNBUFFERED: "1"
+
+  # LiteMAAS configuration (non-sensitive)
+  LITEMAAS_BASE_URL: "https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com"
+
+  # Team configuration
+  TEAM_SUBDOMAIN: "rlteam"
+  HOST_SUFFIX: "example.sslip.io"

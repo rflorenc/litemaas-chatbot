@@ -1,0 +1,41 @@
+apiVersion: v2
+name: mentor-bot
+description: A Helm chart for deploying Open Source Mentor Bot on OpenShift
+type: application
+
+# Chart version (updated for each chart release)
+version: 1.0.0
+
+# Application version
+appVersion: "1.0.0"
+
+# Maintainers
+maintainers:
+  - name: rlteam
+    email: rlteam@example.com
+
+# Keywords for searching
+keywords:
+  - mentor-bot
+  - chatbot
+  - litemaas
+  - openshift
+  - ai
+
+# Home page
+home: https://github.com/rflorenc/opensourcementor
+
+# Sources
+sources:
+  - https://github.com/rflorenc/opensourcementor
+
+# Annotations for OpenShift
+annotations:
+  # OpenShift-specific annotations
+  openshift.io/display-name: "Open Source Mentor Bot"
+  openshift.io/provider-display-name: "RLTeam"
+  openshift.io/support-url: "https://github.com/rflorenc/opensourcementor/issues"
+
+  # Catalog metadata
+  catalog.cloud.google.com/description: "AI-powered mentorship chatbot using LiteMAAS"
+  catalog.cloud.google.com/icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMjAgMkg0Yy0xLjEgMC0yIC45LTIgMnYxOGwyIDJoMTZjMS4xIDAgMi0uOSAyLTJWNGMwLTEuMS0uOS0yLTItMnptLTMgMTJjMCAuNTUtLjQ1IDEtMSAxSDhjLS41NSAwLTEtLjQ1LTEtMXYtMWMwLS41NS40NS0xIDEtMWg4Yy41NSAwIDEgLjQ1IDEgMXYxem0wLTRjMCAuNTUtLjQ1IDEtMSAxSDhjLS41NSAwLTEtLjQ1LTEtMVY5YzAtLjU1LjQ1LTEgMS0xaDhjLjU1IDAgMSAuNDUgMSAxdjF6Ii8+PC9zdmc+"

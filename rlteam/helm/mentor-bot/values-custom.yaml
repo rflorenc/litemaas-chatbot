@@ -1,0 +1,24 @@
+# Custom values for your specific deployment
+# This file overrides both values.yaml and values-openshift.yaml
+
+# Custom image from Quay
+image:
+  repository: quay.io/rlourencc/mentor-bot
+  pullPolicy: Always
+  tag: "warw1"
+
+# Optional: Add custom labels
+labels:
+  app: mentor-bot
+  team: rlteam
+  version: warw1
+  deployment: custom
+
+# Optional: Custom resource limits
+resources:
+  limits:
+    cpu: 2000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi

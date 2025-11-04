@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mentor-bot
+  labels:
+    app: mentor-bot
+    team: rlteam
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mentor-bot
+  template:
+    metadata:
+      labels:
+        app: mentor-bot
+        team: rlteam
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Security context for the pod - OpenShift compatible
+      # Remove hardcoded UID/GID, let OpenShift assign from project range
+      securityContext:
+        runAsNonRoot: true
+        # runAsUser: REMOVED - OpenShift will assign from project UID range
+        # fsGroup: REMOVED - OpenShift will assign from project GID range
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: mentor-bot
+        # OpenShift BuildConfig will create ImageStream
+        # The deployment script will update this with the full registry path
+        image: mentor-bot:latest
+        imagePullPolicy: Always
+
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+
+        # Environment from ConfigMap and Secrets
+        envFrom:
+        - configMapRef:
+            name: mentor-bot-config
+        - secretRef:
+            name: mentor-bot-secrets
+
+        # Resource limits and requests
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+
+        # Liveness probe - checks if container is alive
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        # Readiness probe - checks if container is ready to serve traffic
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        # Startup probe - gives application time to start
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 12  # 60 seconds to start
+
+        # Security context for container - OpenShift restricted-v2 compatible
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false  # Flask needs writable temp
+          runAsNonRoot: true
+          # runAsUser: REMOVED - Let OpenShift assign from project UID range
+
+      # Restart policy
+      restartPolicy: Always
+
+      # DNS policy
+      dnsPolicy: ClusterFirst
+
+      # Service account
+      serviceAccountName: mentor-bot-sa
+
+      # Image pull secrets (if using private registry)
+      # imagePullSecrets:
+      # - name: registry-credentials

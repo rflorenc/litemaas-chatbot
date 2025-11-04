@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mentor-bot.fullname" . }}
+  labels:
+    {{- include "mentor-bot.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mentor-bot.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "mentor-bot.selectorLabels" . | nindent 8 }}
+        {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mentor-bot.serviceAccountName" . }}
+      securityContext:
+        {{- if .Values.podSecurityContext.runAsNonRoot }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        {{- end }}
+        {{- if .Values.podSecurityContext.runAsUser }}
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        {{- end }}
+        {{- if .Values.podSecurityContext.fsGroup }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        {{- end }}
+        {{- if .Values.podSecurityContext.seccompProfile }}
+        seccompProfile:
+          {{- toYaml .Values.podSecurityContext.seccompProfile | nindent 10 }}
+        {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: {{ include "mentor-bot.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: {{ .Values.service.portName }}
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: {{ .Values.service.protocol }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "mentor-bot.configMapName" . }}
+        - secretRef:
+            name: {{ include "mentor-bot.secretName" . }}
+        {{- with .Values.extraEnv }}
+        env:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.extraVolumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst

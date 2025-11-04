@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile
+    # Simple local image name (no registry)
+    image: mentor-bot:latest
+    container_name: rlteam-mentor-bot
+    env_file:
+      - ./.env
+    environment:
+      - PORT=${PORT}
+      - FLASK_ENV=${FLASK_ENV}
+      - LITEMAAS_BASE_URL=${LITEMAAS_BASE_URL}
+      - LITEMAAS_API_KEY=${LITEMAAS_API_KEY}
+      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
+    ports:
+      - "${PORT}:${PORT}"
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:${PORT}/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

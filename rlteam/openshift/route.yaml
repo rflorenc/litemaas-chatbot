@@ -1,0 +1,29 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mentor-bot-route
+  labels:
+    app: mentor-bot
+    team: rlteam
+  annotations:
+    # Optional: Configure route timeout
+    haproxy.router.openshift.io/timeout: 60s
+spec:
+  # Optional: Specify hostname (leave blank for auto-generated)
+  # host: mentor-bot-rlteam.apps.your-cluster.example.com
+
+  to:
+    kind: Service
+    name: mentor-bot-service
+    weight: 100
+
+  port:
+    targetPort: http
+
+  # TLS configuration (recommended for production)
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+  # Route will be automatically exposed at:
+  # http(s)://mentor-bot-route-<namespace>.apps.<cluster-domain>
